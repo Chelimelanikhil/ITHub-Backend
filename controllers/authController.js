@@ -25,20 +25,33 @@ const register = async (req, res) => {
         const user = new User({ name, email, password, role });
         await user.save();
 
-        res.status(201).json({ message: 'User registered successfully' });
+        // Generate JWT
+        const token = jwt.sign(
+            { id: user._id, email: user.email },
+            JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+
+        // Include role in the response
+        res.status(201).json({
+            message: 'User registered successfully',
+            token,
+            role: user.role, // Return role for UI purposes
+        });
     } catch (err) {
         res.status(500).json({ message: 'Error registering user', error: err.message });
     }
 };
 
-
 // Login Controller
 const login = async (req, res) => {
     const { email, password } = req.body;
+    console.log(req.body);
 
     try {
         // Check if user exists
         const user = await User.findOne({ email });
+     
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -66,6 +79,5 @@ const login = async (req, res) => {
         res.status(500).json({ message: 'Error logging in', error: err.message });
     }
 };
-
 
 module.exports = { register, login };
