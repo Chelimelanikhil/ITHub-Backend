@@ -1,58 +1,79 @@
 const Company = require('../models/Company');
 
-const addCompany = async (req, res) => {
-    const { name, email, industry, address, phone, location, employees,founded,image, rating, openings } = req.body;
-     console.log(req.body);
-    try {
-        // Check if company email already exists
-        const existingCompany = await Company.findOne({ email });
-        if (existingCompany) {
-            return res.status(400).json({ message: 'Company email already exists' });
-        }
+// const addCompany = async (req, res) => {
+//     const { name, email, industry, address, phone, location, employees,founded,image, rating, openings } = req.body;
+    
+//     try {
+//         // Check if company email already exists
+//         const existingCompany = await Company.findOne({ email });
+//         if (existingCompany) {
+//             return res.status(400).json({ message: 'Company email already exists' });
+//         }
 
-        // Create new company
-        const company = new Company({
-            name,
-            email,
-            industry,
-            address,
-            phone,
-            location,
-            employees,
-            founded,
-            rating,
-            openings,
-            image,
-            createdBy: req.user.id, // Assuming req.user.id comes from token middleware
-        });
+//         // Create new company
+//         const company = new Company({
+//             name,
+//             email,
+//             industry,
+//             address,
+//             phone,
+//             location,
+//             employees,
+//             founded,
+//             rating,
+//             openings,
+//             image,
+//             createdBy: req.user.id, // Assuming req.user.id comes from token middleware
+//         });
 
-        await company.save();
+//         await company.save();
 
-        res.status(201).json({ message: 'Company added successfully', company });
-    } catch (err) {
-        res.status(500).json({ message: 'Error adding company', error: err.message });
-    }
-};
-
+//         res.status(201).json({ message: 'Company added successfully', company });
+//     } catch (err) {
+//         res.status(500).json({ message: 'Error adding company', error: err.message });
+//     }
+// };
 const getCompany = async (req, res) => {
-    const createdBy = req.user.id; // This is the user's ID (createdBy)
-    console.log(createdBy);
-   
+    const { id } =  req.params; // Extract 'id' from URL params
 
     try {
-        // Query the company using the `createdBy` field
-        const company = await Company.findOne({ createdBy });
-        console.log(company);
+        // Query the company using the `id` parameter
+        const company = await Company.findOne({ _id: id });
+
+       
+
         if (!company) {
             return res.status(404).json({ message: 'Company not found' });
         }
 
-        res.json(company);
+        res.json(company); // Return the company data
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+        console.error(error); // Log any errors that occur
+        res.status(500).json({ message: 'Server error' }); // Return a server error
     }
 };
+
+const getCompanydetails = async (req, res) => {
+    const id  = req.user.id;
+    console.log(id);
+
+    try {
+        // Query the company using the `id` parameter
+        const company = await Company.findOne({ createdBy: id });
+
+        if (!company) {
+            return res.status(404).json({ message: 'Company not found' });
+        }
+
+        res.status(200).json(company); // Return the company data
+    } catch (error) {
+        console.error('Error fetching company details:', error); // Log the error for debugging
+        res.status(500).json({ message: 'Server error' }); // Return a generic server error response
+    }
+};
+
+
+
 
 
 const getAllCompanies = async (req, res) => {
@@ -72,7 +93,7 @@ const getAllCompanies = async (req, res) => {
 const onboarding = async (req, res) => {
     try {
       const { basicInfo, about, jobs, reviews, gallery } = req.body;
-      console.log(req.body); // Log to check the data
+      
   
       // Extract required fields from basicInfo
       const { name, email, industry,founded, address, phone, location, employees, rating, openings, image } = basicInfo;
@@ -113,4 +134,4 @@ const onboarding = async (req, res) => {
   
 
 
-module.exports = { addCompany , getCompany,getAllCompanies,onboarding};
+module.exports = {   getCompany,getAllCompanies,onboarding,getCompanydetails};

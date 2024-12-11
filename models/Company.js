@@ -1,24 +1,5 @@
 const mongoose = require('mongoose');
 
-const jobSchema = new mongoose.Schema({
-    title: { type: String, required: true },
-    description: { type: String, required: true },
-    requirements: { type: String },
-    location: { type: String },
-    salary: { type: Number },
-    postedAt: { type: Date, default: Date.now }
-});
-
-const reviewSchema = new mongoose.Schema({
-    author: { type: String, required: true },
-    text: { type: String, required: true },
-    rating: { type: Number, min: 0, max: 5, required: true },
-    postedAt: { type: Date, default: Date.now }
-});
-
-const galleryImageSchema = new mongoose.Schema({
-    url: { type: String, required: true }
-});
 const companySchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
@@ -35,17 +16,24 @@ const companySchema = new mongoose.Schema({
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     about: { type: String },
     jobs: [{
-      title: String,
-      description: String,
-      requirements: String,
-      location: String,
-      salary: Number,
-    }],
-    reviews: [{
-      author: String,
-      text: String,
-      rating: Number,
-    }],
+        title: { type: String, required: true },
+        description: { type: String, required: true },
+        requirements: { type: String, required: true },
+        location: { type: String, required: true },
+        salary: { type: Number, required: true },
+        type: {
+          type: String,
+          enum: ['Part-Time', 'Full-Time'], // Allowed values
+          required: true,
+        },
+        date: { type: Date, default: Date.now }, // New date field with default value
+      }],
+      reviews: [{
+        author: { type: String, required: true },
+        text: { type: String, required: true },
+        rating: { type: Number, min: 0, max: 5, required: true },
+        date: { type: Date, default: Date.now }, // New date field with default value
+      }],
     gallery: [{
       url: String,
     }]
