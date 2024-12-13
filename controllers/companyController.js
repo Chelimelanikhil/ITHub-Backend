@@ -55,7 +55,6 @@ const getCompany = async (req, res) => {
 
 const getCompanydetails = async (req, res) => {
     const id  = req.user.id;
-    console.log(id);
 
     try {
         // Query the company using the `id` parameter
@@ -134,4 +133,35 @@ const onboarding = async (req, res) => {
   
 
 
-module.exports = {   getCompany,getAllCompanies,onboarding,getCompanydetails};
+  const updateabout = async (req, res) => {
+    const { companyId, about } = req.body;
+  
+    // Validate the request body
+    if (!companyId || !about) {
+      return res.status(400).json({ message: 'Company ID and About are required.' });
+    }
+  
+    try {
+      // Update the company record in the database
+      const updatedCompany = await Company.findByIdAndUpdate(
+        companyId, 
+        { about }, // Set the new "about" content
+        { new: true } // Return the updated document
+      );
+  
+      if (!updatedCompany) {
+        return res.status(404).json({ message: 'Company not found.' });
+      }
+  
+      res.status(200).json({
+        message: 'Company about section updated successfully.'
+      });
+    } catch (error) {
+      console.error('Error updating company:', error);
+      res.status(500).json({ message: 'Internal server error. Please try again later.' });
+    }
+  }
+
+
+
+module.exports = {   getCompany,getAllCompanies,onboarding,getCompanydetails,updateabout};

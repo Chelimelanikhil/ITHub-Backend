@@ -46,7 +46,7 @@ const register = async (req, res) => {
 // Login Controller
 const login = async (req, res) => {
     const { email, password } = req.body;
-    console.log(req.body);
+    
 
     try {
         // Check if user exists
