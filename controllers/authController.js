@@ -29,7 +29,7 @@ const register = async (req, res) => {
         const token = jwt.sign(
             { id: user._id, email: user.email },
             JWT_SECRET,
-            { expiresIn: '1h' }
+            { expiresIn: '10h' }
         );
 
         // Include role in the response
@@ -66,7 +66,7 @@ const login = async (req, res) => {
         const token = jwt.sign(
             { id: user._id, email: user.email },
             JWT_SECRET,
-            { expiresIn: '1h' }
+            { expiresIn: '10h' }
         );
 
         // Include role in the response
