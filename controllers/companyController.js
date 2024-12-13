@@ -221,4 +221,116 @@ const updateJob = async (req, res) => {
   };
 
 
-module.exports = { getCompany, getAllCompanies, onboarding, getCompanydetails, updateabout, addJob , updateJob,deleteJob};
+  const addreview = async (req, res) => {
+    try {
+     
+  
+      const { companyId, author, text, rating } = req.body;
+  
+      // Ensure the rating is between 0 and 5
+      if (rating < 0 || rating > 5) {
+        return res.status(400).json({ msg: 'Rating must be between 0 and 5' });
+      }
+  
+      // Find the company by ID
+      const company = await Company.findById(companyId);
+  
+      if (!company) {
+        return res.status(404).json({ msg: 'Company not found' });
+      }
+  
+      // Create the new review object
+      const newReview = {
+        author,
+        text,
+        rating,
+      };
+  
+      // Push the new review into the reviews array
+      company.reviews.push(newReview);
+  
+      // Save the updated company document
+      await company.save();
+  
+      // Return success response
+      res.status(200).json({ msg: 'Review added successfully', review: newReview });
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ msg: 'Server error' });
+    }
+  };
+
+  const updatereview = async (req, res) => {
+    try {
+
+      const { companyId, reviewId, author, text, rating } = req.body;
+  
+      // Ensure the rating is between 0 and 5
+      if (rating < 0 || rating > 5) {
+        return res.status(400).json({ msg: 'Rating must be between 0 and 5' });
+      }
+  
+      // Find the company by ID
+      const company = await Company.findById(companyId);
+  
+      if (!company) {
+        return res.status(404).json({ msg: 'Company not found' });
+      }
+  
+      // Find the review by ID (assuming reviewId is the index or unique identifier)
+      const reviewIndex = company.reviews.findIndex(review => review._id.toString() === reviewId);
+  
+      if (reviewIndex === -1) {
+        return res.status(404).json({ msg: 'Review not found' });
+      }
+  
+      // Update the review fields
+      company.reviews[reviewIndex].author = author || company.reviews[reviewIndex].author;
+      company.reviews[reviewIndex].text = text || company.reviews[reviewIndex].text;
+      company.reviews[reviewIndex].rating = rating || company.reviews[reviewIndex].rating;
+  
+      // Save the updated company document
+      await company.save();
+  
+      // Return success response
+      res.status(200).json({ msg: 'Review updated successfully', review: company.reviews[reviewIndex] });
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ msg: 'Server error' });
+    }
+  };
+
+  const deletereview = async (req, res) => {
+    try {
+      const { companyId, reviewId } = req.body;
+  
+      // Find the company by ID
+      const company = await Company.findById(companyId);
+  
+      if (!company) {
+        return res.status(404).json({ msg: 'Company not found' });
+      }
+  
+      // Find the index of the review in the reviews array
+      const reviewIndex = company.reviews.findIndex(review => review._id.toString() === reviewId);
+  
+      if (reviewIndex === -1) {
+        return res.status(404).json({ msg: 'Review not found' });
+      }
+  
+      // Remove the review from the reviews array
+      company.reviews.splice(reviewIndex, 1);
+  
+      // Save the updated company document
+      await company.save();
+  
+      // Return success response
+      res.status(200).json({ msg: 'Review deleted successfully' });
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ msg: 'Server error' });
+    }
+  };
+  
+
+module.exports = { getCompany, getAllCompanies, onboarding, getCompanydetails, updateabout, addJob , updateJob,deleteJob,addreview,updatereview,deletereview};

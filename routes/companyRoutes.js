@@ -1,6 +1,6 @@
 const express = require('express');
 
-const { getCompany,getAllCompanies ,onboarding,getCompanydetails,updateabout,addJob,updateJob,deleteJob} = require('../controllers/companyController');
+const { getCompany,getAllCompanies ,onboarding,getCompanydetails,updateabout,addJob,updateJob,deleteJob,addreview,updatereview,deletereview} = require('../controllers/companyController');
 const { authenticate } = require('../middleware/authMiddleware');
 
 // Initialize Router
@@ -24,7 +24,14 @@ router.put('/update-job', authenticate, updateJob);
 // Route for deleting a job
 router.delete('/delete-job', authenticate, deleteJob);
 
+// Route for adding a new review
+router.post('/add-review', authenticate, addreview);
 
+ // Route for updating an existing review
+router.put('/update-review', authenticate, updatereview);
+
+// Route for deleting a review
+router.delete('/delete-review', authenticate, deletereview);
 
 router.get('/companydetails/:id', getCompany);
 
