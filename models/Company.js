@@ -23,7 +23,7 @@ const companySchema = new mongoose.Schema({
         salary: { type: Number, required: true },
         type: {
           type: String,
-          enum: ['Part-Time', 'Full-Time'], // Allowed values
+          enum: ['Part-Time', 'Full-Time', 'Internship', 'Contract'], 
           required: true,
         },
         date: { type: Date, default: Date.now }, // New date field with default value
