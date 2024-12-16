@@ -331,6 +331,37 @@ const updateJob = async (req, res) => {
       res.status(500).json({ msg: 'Server error' });
     }
   };
+
+
+
+  const addimages = async (req, res) => {
+    const { companyId } = req.params;  // Get the companyId from the route parameter
+    const { imageUrls } = req.body;    // Get the array of image URLs from the request body
+    
+    if (!imageUrls || !Array.isArray(imageUrls)) {
+      return res.status(400).json({ message: 'Invalid image URLs' });
+    }
+  
+    try {
+      // Find the company by ID
+      const company = await Company.findById(companyId);
+      
+      if (!company) {
+        return res.status(404).json({ message: 'Company not found' });
+      }
+  
+      // Add new image URLs to the company's gallery
+      company.gallery.push(...imageUrls.map(url => ({ url })));
+  
+      // Save the updated company document
+      await company.save();
+  
+      res.status(200).json({ message: 'Images added successfully', gallery: company.gallery });
+    } catch (error) {
+      console.error('Error adding images:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  };
   
 
-module.exports = { getCompany, getAllCompanies, onboarding, getCompanydetails, updateabout, addJob , updateJob,deleteJob,addreview,updatereview,deletereview};
+module.exports = { getCompany, getAllCompanies, onboarding, getCompanydetails, updateabout, addJob , updateJob,deleteJob,addreview,updatereview,deletereview,addimages};
