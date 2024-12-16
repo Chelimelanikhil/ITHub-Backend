@@ -335,17 +335,16 @@ const updateJob = async (req, res) => {
 
 
   const addimages = async (req, res) => {
-    const { companyId } = req.params;  // Get the companyId from the route parameter
-    const { imageUrls } = req.body;    // Get the array of image URLs from the request body
-    
-    if (!imageUrls || !Array.isArray(imageUrls)) {
-      return res.status(400).json({ message: 'Invalid image URLs' });
-    }
-  
     try {
+      const { companyId } = req.params;
+      const { imageUrls } = req.body; // Ensure this matches client-side payload key
+  
+      if (!imageUrls || !Array.isArray(imageUrls)) {
+        return res.status(400).json({ message: 'Invalid image URLs' });
+      }
+  
       // Find the company by ID
       const company = await Company.findById(companyId);
-      
       if (!company) {
         return res.status(404).json({ message: 'Company not found' });
       }
@@ -363,5 +362,47 @@ const updateJob = async (req, res) => {
     }
   };
   
+  const deleteimages = async  (req, res) => {
+    const { companyId } = req.params; // Get companyId from the URL
+    const { imageId } = req.body; // Get imageId from the request body
+    console.log(req.body);
+  
+    if (!imageId) {
+      return res.status(400).json({ message: 'Image ID is required' });
+    }
+  
+    try {
+      // Find the company by companyId
+      const company = await Company.findById(companyId);
+      
+      if (!company) {
+        return res.status(404).json({ message: 'Company not found' });
+      }
+  
+      // Find the image in the gallery using imageId
+      const imageIndex = company.gallery.findIndex(image => image._id.toString() === imageId);
+  
+      if (imageIndex === -1) {
+        return res.status(404).json({ message: 'Image not found' });
+      }
+  
+      // Remove the image from the gallery
+      company.gallery.splice(imageIndex, 1);
+  
+      // Save the updated gallery to the database
+      await company.save();
+  
+      res.status(200).json({ message: 'Image deleted successfully', updatedGallery: company.gallery });
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      res.status(500).json({ message: 'Server error. Failed to delete image.' });
+    }
+  }
+  
 
-module.exports = { getCompany, getAllCompanies, onboarding, getCompanydetails, updateabout, addJob , updateJob,deleteJob,addreview,updatereview,deletereview,addimages};
+
+
+
+
+
+module.exports = { getCompany, getAllCompanies, onboarding, getCompanydetails, updateabout, addJob , updateJob,deleteJob,addreview,updatereview,deletereview,addimages,deleteimages};
