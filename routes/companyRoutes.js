@@ -1,6 +1,6 @@
 const express = require('express');
 
-const { getCompany, getAllCompanies, onboarding, getCompanydetails, updateabout, addJob, updateJob, deleteJob, addreview, updatereview, deletereview, addimages, deleteimages } = require('../controllers/companyController');
+const { getCompany, getAllCompanies, onboarding, getCompanydetails, updateabout, addJob, updateJob, deleteJob, addreview, updatereview, deletereview, addimages, deleteimages,deleteMultipleImages } = require('../controllers/companyController');
 const { authenticate } = require('../middleware/authMiddleware');
 
 // Initialize Router
@@ -31,6 +31,10 @@ router.put('/update-review', authenticate, updatereview);
 router.post('/add-images/:companyId', authenticate, addimages);
 
 router.delete('/delete-image/:companyId', authenticate, deleteimages);
+
+
+router.delete('/delete-images/:companyId', authenticate, deleteMultipleImages);
+
 
 // Route for deleting a review
 router.delete('/delete-review', authenticate, deletereview);
