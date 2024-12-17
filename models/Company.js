@@ -30,6 +30,7 @@ const companySchema = new mongoose.Schema({
       }],
       reviews: [{
         author: { type: String, required: true },
+        designation: { type: String, required: true },
         text: { type: String, required: true },
         rating: { type: Number, min: 0, max: 5, required: true },
         date: { type: Date, default: Date.now }, // New date field with default value

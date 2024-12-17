@@ -220,12 +220,10 @@ const deleteJob = async (req, res) => {
   }
 };
 
-
 const addreview = async (req, res) => {
   try {
-
-
-    const { companyId, author, text, rating } = req.body;
+    const { companyId, author, designation, text, rating } = req.body;
+    console.log(req.body);
 
     // Ensure the rating is between 0 and 5
     if (rating < 0 || rating > 5) {
@@ -242,8 +240,10 @@ const addreview = async (req, res) => {
     // Create the new review object
     const newReview = {
       author,
+      designation, // Include designation
       text,
       rating,
+      date: Date.now(), // Set current date
     };
 
     // Push the new review into the reviews array
@@ -259,6 +259,7 @@ const addreview = async (req, res) => {
     res.status(500).json({ msg: 'Server error' });
   }
 };
+
 
 const updatereview = async (req, res) => {
   try {
