@@ -445,7 +445,8 @@ const deleteMultipleImages = async (req, res) => {
 
 const updatecompanyprofilepic = async (req, res) => {
   try {
-    const { companyId, image } = req.body; // Image in base64 format, companyId for updating
+    const { companyId, image } = req.body; 
+   
 
     // Validate inputs
     if (!companyId || !image) {
@@ -460,13 +461,13 @@ const updatecompanyprofilepic = async (req, res) => {
     }
 
     // Update the company profile with the new image
-    company.profileImage = image;
+    company.image = image;
 
     // Save the updated company object
     await company.save();
 
     // Send the updated company data as a response
-    res.status(200).json({ message: 'Profile image updated successfully!', company });
+    res.status(200).json({ message: 'Profile image updated successfully!' });
   } catch (error) {
     console.error('Error uploading profile image:', error);
     res.status(500).json({ message: 'Internal server error.' });
