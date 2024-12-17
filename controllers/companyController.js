@@ -443,6 +443,35 @@ const deleteMultipleImages = async (req, res) => {
 
 
 
+const updatecompanyprofilepic = async (req, res) => {
+  try {
+    const { companyId, image } = req.body; // Image in base64 format, companyId for updating
+
+    // Validate inputs
+    if (!companyId || !image) {
+      return res.status(400).json({ message: 'Company ID and image are required.' });
+    }
+
+    // Find the company in the database
+    const company = await Company.findById(companyId);
+
+    if (!company) {
+      return res.status(404).json({ message: 'Company not found.' });
+    }
+
+    // Update the company profile with the new image
+    company.profileImage = image;
+
+    // Save the updated company object
+    await company.save();
+
+    // Send the updated company data as a response
+    res.status(200).json({ message: 'Profile image updated successfully!', company });
+  } catch (error) {
+    console.error('Error uploading profile image:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+}
 
 
-module.exports = { getCompany, getAllCompanies, onboarding, getCompanydetails, updateabout, addJob, updateJob, deleteJob, addreview, updatereview, deletereview, addimages, deleteimages,deleteMultipleImages };
+module.exports = { getCompany, getAllCompanies, onboarding, getCompanydetails, updateabout, addJob, updateJob, deleteJob, addreview, updatereview, deletereview, addimages, deleteimages,deleteMultipleImages,updatecompanyprofilepic };

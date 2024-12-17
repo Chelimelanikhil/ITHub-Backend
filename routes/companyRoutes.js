@@ -1,6 +1,6 @@
 const express = require('express');
 
-const { getCompany, getAllCompanies, onboarding, getCompanydetails, updateabout, addJob, updateJob, deleteJob, addreview, updatereview, deletereview, addimages, deleteimages,deleteMultipleImages } = require('../controllers/companyController');
+const { getCompany, getAllCompanies, onboarding, getCompanydetails, updateabout, addJob, updateJob, deleteJob, addreview, updatereview, deletereview, addimages, deleteimages,deleteMultipleImages,updatecompanyprofilepic } = require('../controllers/companyController');
 const { authenticate } = require('../middleware/authMiddleware');
 
 // Initialize Router
@@ -15,6 +15,8 @@ router.put('/update-about', authenticate, updateabout);
 
 // Route for adding a new job
 router.post('/add-job', authenticate, addJob);
+
+router.post('/update-company-profile-pic', authenticate, updatecompanyprofilepic);
 
 // Route for updating an existing job
 router.put('/update-job', authenticate, updateJob);
