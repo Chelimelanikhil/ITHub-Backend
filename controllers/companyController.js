@@ -54,20 +54,132 @@ const getAllCompanies = async (req, res) => {
   }
 };
 
+// const onboarding = async (req, res) => {
+//   try {
+//     const { basicInfo, about, jobs, reviews, gallery } = req.body;
+
+
+//     // Extract required fields from basicInfo
+//     const { name, email, industry, founded, address, phone, location, employees, rating, openings, image } = basicInfo;
+
+//     // Create a new company instance with all the data
+//     const newCompany = new Company({
+//       name,
+//       email,
+//       industry,
+//       founded,
+//       address,
+//       phone,
+//       location,
+//       employees,
+//       rating,
+//       openings,
+//       image,
+//       createdBy: req.user.id,
+//       about,
+//       jobs,
+//       reviews,
+//       gallery
+//     });
+
+//     // Save the new company to the database
+//     await newCompany.save();
+
+//     // Send a response confirming the data has been saved
+//     res.status(201).json({
+//       message: 'Company profile saved successfully!',
+//       company: newCompany
+//     });
+//   } catch (error) {
+//     console.error('Error saving company profile:', error);
+//     res.status(500).json({ message: 'Internal Server Error', error: error.message });
+//   }
+// };
+
 const onboarding = async (req, res) => {
   try {
-    const { basicInfo, about, jobs, reviews, gallery } = req.body;
+    // Destructure the request body
+    const { 
+      basicInfo, 
+      about, 
+      jobs, 
+      reviews, 
+      gallery,
+      socialLinks,
+      certifications,
+      website,
+      description,
+      headquarters
+    } = req.body;
 
+    // Validate basic required fields
+    if (!basicInfo || !basicInfo.name || !basicInfo.email || !basicInfo.industry) {
+      return res.status(400).json({ 
+        message: 'Missing required fields',
+        requiredFields: ['name', 'email', 'industry']
+      });
+    }
 
-    // Extract required fields from basicInfo
-    const { name, email, industry, founded, address, phone, location, employees, rating, openings, image } = basicInfo;
+    // Extract fields from basicInfo
+    const { 
+      name, 
+      email, 
+      industry, 
+      foundedYear, 
+      address, 
+      phone, 
+      location, 
+      employees, 
+      rating, 
+      openings, 
+      image,
+      logo
+    } = basicInfo;
+
+    // Validate email format
+    const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ 
+        message: 'Invalid email format',
+        example: 'example@domain.com'
+      });
+    }
+
+    // Check if a company with this email already exists
+    const existingCompany = await Company.findOne({ email });
+    if (existingCompany) {
+      return res.status(409).json({ 
+        message: 'A company with this email already exists'
+      });
+    }
+
+    // Validate jobs if provided
+    if (jobs && jobs.length > 0) {
+      const validJobTypes = ['Part-Time', 'Full-Time', 'Internship', 'Contract'];
+      const invalidJobs = jobs.filter(job => 
+        !job.title || 
+        !job.description || 
+        !job.requirements || 
+        !job.location || 
+        job.salary === undefined ||
+        !validJobTypes.includes(job.type)
+      );
+
+      if (invalidJobs.length > 0) {
+        return res.status(400).json({ 
+          message: 'Invalid job entries',
+          invalidJobs
+        });
+      }
+    }
 
     // Create a new company instance with all the data
     const newCompany = new Company({
+      // Basic Info
       name,
       email,
       industry,
-      founded,
+      foundedYear,
       address,
       phone,
       location,
@@ -75,27 +187,61 @@ const onboarding = async (req, res) => {
       rating,
       openings,
       image,
+      logo,
+      
+      // Additional Fields
       createdBy: req.user.id,
       about,
-      jobs,
-      reviews,
-      gallery
+      description,
+      headquarters,
+      website,
+      
+      // Optional Fields
+      socialLinks: socialLinks || {},
+      certifications: certifications || [],
+      
+      // Nested Documents
+      jobs: jobs || [],
+      reviews: reviews || [],
+      gallery: gallery || []
     });
 
     // Save the new company to the database
-    await newCompany.save();
+    const savedCompany = await newCompany.save();
 
     // Send a response confirming the data has been saved
     res.status(201).json({
-      message: 'Company profile saved successfully!',
-      company: newCompany
+      message: 'Company profile created successfully!',
+      company: {
+        id: savedCompany._id,
+        name: savedCompany.name,
+        email: savedCompany.email,
+        industry: savedCompany.industry
+      }
     });
   } catch (error) {
     console.error('Error saving company profile:', error);
-    res.status(500).json({ message: 'Internal Server Error', error: error.message });
+
+    // Handle specific Mongoose validation errors
+    if (error.name === 'ValidationError') {
+      const validationErrors = Object.values(error.errors).map(err => ({
+        field: err.path,
+        message: err.message
+      }));
+
+      return res.status(400).json({ 
+        message: 'Validation Error',
+        errors: validationErrors 
+      });
+    }
+
+    // Generic server error
+    res.status(500).json({ 
+      message: 'Internal Server Error', 
+      error: error.message 
+    });
   }
 };
-
 
 
 const updateabout = async (req, res) => {
