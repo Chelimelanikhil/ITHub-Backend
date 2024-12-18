@@ -32,6 +32,7 @@ const getCompanydetails = async (req, res) => {
     }
 
     res.status(200).json(company); // Return the company data
+    console.log(company);
   } catch (error) {
     console.error('Error fetching company details:', error); // Log the error for debugging
     res.status(500).json({ message: 'Server error' }); // Return a generic server error response
@@ -96,7 +97,156 @@ const getAllCompanies = async (req, res) => {
 //   }
 // };
 
+// const onboarding = async (req, res) => {
+//   try {
+//     // Destructure the request body
+//     const { 
+//       basicInfo, 
+//       about, 
+//       jobs, 
+//       reviews, 
+//       gallery,
+//       socialLinks,
+//       certifications,
+//       website,
+//       description,
+//       headquarters
+//     } = req.body;
+
+//     // Validate basic required fields
+//     if (!basicInfo || !basicInfo.name || !basicInfo.email || !basicInfo.industry) {
+//       return res.status(400).json({ 
+//         message: 'Missing required fields',
+//         requiredFields: ['name', 'email', 'industry']
+//       });
+//     }
+
+//     // Extract fields from basicInfo
+//     const { 
+//       name, 
+//       email, 
+//       industry, 
+//       foundedYear, 
+//       address, 
+//       phone, 
+//       location, 
+//       employees, 
+//       rating, 
+//       openings, 
+//       logo
+//     } = basicInfo;
+//     console.log(basicInfo);
+
+//     // Validate email format
+//     const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+//     if (!emailRegex.test(email)) {
+//       return res.status(400).json({ 
+//         message: 'Invalid email format',
+//         example: 'example@domain.com'
+//       });
+//     }
+
+//     // Check if a company with this email already exists
+//     const existingCompany = await Company.findOne({ email });
+//     if (existingCompany) {
+//       return res.status(409).json({ 
+//         message: 'A company with this email already exists'
+//       });
+//     }
+
+//     // Validate jobs if provided
+//     if (jobs && jobs.length > 0) {
+//       const validJobTypes = ['Part-Time', 'Full-Time', 'Internship', 'Contract'];
+//       const invalidJobs = jobs.filter(job => 
+//         !job.title || 
+//         !job.description || 
+//         !job.requirements || 
+//         !job.location || 
+//         job.salary === undefined ||
+//         !validJobTypes.includes(job.type)
+//       );
+
+//       if (invalidJobs.length > 0) {
+//         return res.status(400).json({ 
+//           message: 'Invalid job entries',
+//           invalidJobs
+//         });
+//       }
+//     }
+
+//     // Create a new company instance with all the data
+//     const newCompany = new Company({
+//       // Basic Info
+//       name,
+//       email,
+//       industry,
+//       foundedYear,
+//       address,
+//       phone,
+//       location,
+//       employees,
+//       rating,
+//       openings,
+//       logo,
+      
+//       // Additional Fields
+//       createdBy: req.user.id,
+//       about,
+//       description,
+//       headquarters,
+//       website,
+      
+//       // Optional Fields
+//       socialLinks: socialLinks || {},
+//       certifications: certifications || [],
+      
+//       // Nested Documents
+//       jobs: jobs || [],
+//       reviews: reviews || [],
+//       gallery: gallery || []
+//     });
+
+//     // Save the new company to the database
+//     const savedCompany = await newCompany.save();
+
+//     // Send a response confirming the data has been saved
+//     res.status(201).json({
+//       message: 'Company profile created successfully!',
+//       company: {
+//         id: savedCompany._id,
+//         name: savedCompany.name,
+//         email: savedCompany.email,
+//         industry: savedCompany.industry
+//       }
+//     });
+//   } catch (error) {
+//     console.error('Error saving company profile:', error);
+
+//     // Handle specific Mongoose validation errors
+//     if (error.name === 'ValidationError') {
+//       const validationErrors = Object.values(error.errors).map(err => ({
+//         field: err.path,
+//         message: err.message
+//       }));
+
+//       return res.status(400).json({ 
+//         message: 'Validation Error',
+//         errors: validationErrors 
+//       });
+//     }
+
+//     // Generic server error
+//     res.status(500).json({ 
+//       message: 'Internal Server Error', 
+//       error: error.message 
+//     });
+//   }
+// };
+
+
 const onboarding = async (req, res) => {
+ 
+ 
   try {
     // Destructure the request body
     const { 
@@ -104,12 +254,7 @@ const onboarding = async (req, res) => {
       about, 
       jobs, 
       reviews, 
-      gallery,
-      socialLinks,
-      certifications,
-      website,
-      description,
-      headquarters
+      gallery
     } = req.body;
 
     // Validate basic required fields
@@ -120,20 +265,23 @@ const onboarding = async (req, res) => {
       });
     }
 
-    // Extract fields from basicInfo
+    // Extract fields from basicInfo with destructuring and added default values
     const { 
       name, 
       email, 
       industry, 
-      foundedYear, 
-      address, 
-      phone, 
+      founded: foundedYear, 
       location, 
       employees, 
       rating, 
       openings, 
-      image,
-      logo
+      logo,
+      phone,
+      headquarters,
+      website,
+      description,
+      socialLinks = {},
+      certifications = []
     } = basicInfo;
 
     // Validate email format
@@ -180,14 +328,12 @@ const onboarding = async (req, res) => {
       email,
       industry,
       foundedYear,
-      address,
-      phone,
       location,
       employees,
       rating,
       openings,
-      image,
       logo,
+      phone,
       
       // Additional Fields
       createdBy: req.user.id,
@@ -197,8 +343,8 @@ const onboarding = async (req, res) => {
       website,
       
       // Optional Fields
-      socialLinks: socialLinks || {},
-      certifications: certifications || [],
+      socialLinks,
+      certifications,
       
       // Nested Documents
       jobs: jobs || [],
@@ -242,7 +388,6 @@ const onboarding = async (req, res) => {
     });
   }
 };
-
 
 const updateabout = async (req, res) => {
   const { companyId, about } = req.body;
