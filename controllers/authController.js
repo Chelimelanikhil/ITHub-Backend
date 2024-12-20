@@ -131,7 +131,8 @@ const forgotPassword = async (req, res) => {
 
 
 const resetPassword = async (req, res) => {
-    const { email, resetCode, newPassword } = req.body;
+    const { resetCode, newPassword } = req.body;
+    const  email  = req.body.email;
 
   if (!email || !resetCode || !newPassword) {
     return res.status(400).json({ message: 'Email, code, and new password are required' });
@@ -150,7 +151,7 @@ const resetPassword = async (req, res) => {
     }
 
     // Update the user's password
-    user.password = bcrypt.hashSync(newPassword, 10); // Hash the new password
+    user.password =newPassword; // Hash the new password
     user.resetPasswordCode = undefined;
     user.resetPasswordExpires = undefined;
     await user.save();
