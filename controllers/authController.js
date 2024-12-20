@@ -101,7 +101,7 @@ const forgotPassword = async (req, res) => {
         await user.save();
 
         // Send reset link via email
-        const resetUrl = `http://localhost:8081/auth/reset-password/${resetToken}`;
+        const resetUrl = `${req.protocol}://${req.get('host')}/api/auth/reset-password/${resetToken}`;
 
         const transporter = nodemailer.createTransport({
             service: 'gmail', // or your email service provider
