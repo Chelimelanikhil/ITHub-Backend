@@ -8,7 +8,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'sdfyuiojhgfdsfgihfxg';
 
 // Register Controller
 const register = async (req, res) => {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, profilePic } = req.body;  // Include profilePic in the request
 
     try {
         // Validate role
@@ -23,7 +23,9 @@ const register = async (req, res) => {
         }
 
         // Create new user
-        const user = new User({ name, email, password, role });
+        const user = new User({ name, email, password, role, profilePic });
+
+        // Save the user to the database
         await user.save();
 
         // Generate JWT
@@ -49,29 +51,26 @@ const register = async (req, res) => {
             html: `
               <h3>Welcome to Our Platform!</h3>
               <p>Your registration was successful. You can now log in to your account.</p>
-              <p>If you did not register, please contact support immediately.</p>
             `,
         };
 
         // Send the email
         await transporter.sendMail(mailOptions);
 
-        // Include role in the response
+        // Include role and token in the response
         res.status(201).json({
             message: 'User registered successfully',
             token,
-            role: user.role, // Return role for UI purposes
+            role: user.role,
+            profilePic: user.profilePic, // Include the profile picture URL or base64 data in the response
         });
     } catch (err) {
         res.status(500).json({ message: 'Error registering user', error: err.message });
     }
 };
-
 // Login Controller
 const login = async (req, res) => {
     const { email, password } = req.body;
-
-
     try {
         // Check if user exists
         const user = await User.findOne({ email });
@@ -105,8 +104,6 @@ const login = async (req, res) => {
 };
 
 
-
-
 const forgotPassword = async (req, res) => {
     const { email } = req.body;
 
@@ -122,7 +119,7 @@ const forgotPassword = async (req, res) => {
         user.resetPasswordCode = resetCode;
         user.resetPasswordExpires = Date.now() + 5 * 60 * 1000; // 5 minutes
         await user.save();
-       
+
 
         const transporter = nodemailer.createTransport({
             service: 'gmail', // or your email service provider
@@ -141,7 +138,7 @@ const forgotPassword = async (req, res) => {
               <p>Your password reset code is: <strong>${resetCode}</strong></p>
               <p>This code will expire in 5 minutes.</p>
             `,
-          };
+        };
 
         await transporter.sendMail(mailOptions);
 
@@ -155,35 +152,35 @@ const forgotPassword = async (req, res) => {
 
 const resetPassword = async (req, res) => {
     const { resetCode, newPassword } = req.body;
-    const  email  = req.body.email;
+    const email = req.body.email;
 
-  if (!email || !resetCode || !newPassword) {
-    return res.status(400).json({ message: 'Email, code, and new password are required' });
-  }
-
-  try {
-    // Find the user by email and verify the reset code
-    const user = await User.findOne({
-      email,
-      resetPasswordCode: resetCode,
-      resetPasswordExpires: { $gt: Date.now() },
-    });
-
-    if (!user) {
-      return res.status(400).json({ message: 'Invalid or expired reset code' });
+    if (!email || !resetCode || !newPassword) {
+        return res.status(400).json({ message: 'Email, code, and new password are required' });
     }
 
-    // Update the user's password
-    user.password =newPassword; // Hash the new password
-    user.resetPasswordCode = undefined;
-    user.resetPasswordExpires = undefined;
-    await user.save();
+    try {
+        // Find the user by email and verify the reset code
+        const user = await User.findOne({
+            email,
+            resetPasswordCode: resetCode,
+            resetPasswordExpires: { $gt: Date.now() },
+        });
 
-    res.status(200).json({ message: 'Password reset successfully' });
-  } catch (error) {
-    console.error('Error in reset password:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid or expired reset code' });
+        }
+
+        // Update the user's password
+        user.password = newPassword; // Hash the new password
+        user.resetPasswordCode = undefined;
+        user.resetPasswordExpires = undefined;
+        await user.save();
+
+        res.status(200).json({ message: 'Password reset successfully' });
+    } catch (error) {
+        console.error('Error in reset password:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
 }
 
 module.exports = { register, login, forgotPassword, resetPassword };
