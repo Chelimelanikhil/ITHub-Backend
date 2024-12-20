@@ -514,7 +514,7 @@ const deleteJob = async (req, res) => {
 const addreview = async (req, res) => {
   try {
     const { companyId, author, designation, text, rating } = req.body;
-    console.log(req.body);
+   
 
     // Ensure the rating is between 0 and 5
     if (rating < 0 || rating > 5) {
