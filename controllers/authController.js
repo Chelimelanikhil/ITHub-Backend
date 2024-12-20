@@ -33,6 +33,29 @@ const register = async (req, res) => {
             { expiresIn: '10h' }
         );
 
+        // Send registration confirmation email
+        const transporter = nodemailer.createTransport({
+            service: 'gmail', // Use your email service provider
+            auth: {
+                user: process.env.EMAIL_USER, // Your email
+                pass: process.env.EMAIL_PASS, // Your password
+            },
+        });
+
+        const mailOptions = {
+            from: 'noreply@example.com',
+            to: user.email,
+            subject: 'Registration Successful',
+            html: `
+              <h3>Welcome to Our Platform!</h3>
+              <p>Your registration was successful. You can now log in to your account.</p>
+              <p>If you did not register, please contact support immediately.</p>
+            `,
+        };
+
+        // Send the email
+        await transporter.sendMail(mailOptions);
+
         // Include role in the response
         res.status(201).json({
             message: 'User registered successfully',
