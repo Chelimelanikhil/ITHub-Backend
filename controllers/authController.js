@@ -63,7 +63,7 @@ const register = async (req, res) => {
             message: 'User registered successfully',
             token,
             role: user.role,
-            profilePic: user.profilePic, // Include the profile picture URL or base64 data in the response
+            profilePic: user.profilePic, 
         });
     } catch (err) {
         res.status(500).json({ message: 'Error registering user', error: err.message });

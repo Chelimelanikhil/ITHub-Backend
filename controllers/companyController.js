@@ -1,4 +1,5 @@
 const Company = require('../models/Company');
+const SavedCompany = require('../models/savedCompanyModel');
 
 const getCompany = async (req, res) => {
   const { id } = req.params; // Extract 'id' from URL params
@@ -764,4 +765,74 @@ const updatecompanyprofilepic = async (req, res) => {
 }
 
 
-module.exports = { getCompany, getAllCompanies, onboarding, getCompanydetails, updateabout, addJob, updateJob, deleteJob, addreview, updatereview, deletereview, addimages, deleteimages,deleteMultipleImages,updatecompanyprofilepic };
+
+const savecompany= async (req, res) => {
+  try {
+    const userId = req.user.id;
+    console.log(userId);
+    const { companyId, companyName, companyLogo } = req.body;
+    
+    const savedCompany = new SavedCompany({
+      userId,
+      companyId,
+      companyName,
+      companyLogo,
+      savedAt: new Date()
+    });
+    
+    await savedCompany.save();
+    
+    res.status(201).json({ message: 'Company saved successfully' });
+  } catch (error) {
+    if (error.code === 11000) { // Duplicate key error
+      res.status(400).json({ message: 'Company already saved' });
+    } else {
+      res.status(500).json({ message: 'Error saving company', error: error.message });
+    }
+  }
+}
+
+
+const  savedcompany =async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const {  companyId } = req.params;
+    
+    const savedCompany = await SavedCompany.findOne({ userId, companyId });
+    
+    res.json({ isSaved: !!savedCompany });
+  } catch (error) {
+    res.status(500).json({ message: 'Error checking saved status', error: error.message });
+  }
+}
+
+
+const deletecompany = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { companyId } = req.params;
+    
+    await SavedCompany.findOneAndDelete({ userId, companyId });
+    
+    res.json({ message: 'Company removed from saved' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error removing saved company', error: error.message });
+  }
+}
+
+
+const getsavedcompanies= async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    
+    const savedCompanies = await SavedCompany.find({ userId })
+      .sort({ savedAt: -1 }); // Most recent first
+    
+    res.json(savedCompanies);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching saved companies', error: error.message });
+  }
+}
+
+module.exports = { getCompany, getAllCompanies, onboarding, getCompanydetails, updateabout, addJob, updateJob, deleteJob, addreview, updatereview, deletereview, addimages, deleteimages,deleteMultipleImages,updatecompanyprofilepic,savecompany,savedcompany,deletecompany,getsavedcompanies };
