@@ -245,8 +245,6 @@ const getAllCompanies = async (req, res) => {
 
 
 const onboarding = async (req, res) => {
- 
- 
   try {
     // Destructure the request body
     const { 

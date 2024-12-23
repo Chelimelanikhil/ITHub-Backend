@@ -8,6 +8,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'sdfyuiojhgfdsfgihfxg';
 
 // Register Controller
 const register = async (req, res) => {
+    console.log(req.body);
     const { name, email, password, role, profilePic } = req.body;  // Include profilePic in the request
 
     try {
@@ -183,4 +184,38 @@ const resetPassword = async (req, res) => {
     }
 }
 
-module.exports = { register, login, forgotPassword, resetPassword };
+const updatePassword = async (req, res)=>{
+    const userId = req.user.id;
+    const { oldPassword, newPassword } = req.body;
+    console.log(req.body);
+
+    if (!userId || !oldPassword || !newPassword) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+  
+    try {
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      // Verify old password
+      const isMatch = await bcrypt.compare(oldPassword, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ message: 'Old password is incorrect' });
+      }
+  
+      // Hash new password
+      //const hashedPassword = await bcrypt.hash(newPassword, 10);
+      user.password = newPassword;
+  
+      await user.save();
+      res.status(200).json({ message: 'Password reset successfully' });
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  
+}
+
+module.exports = { register, login, forgotPassword, resetPassword,updatePassword };
