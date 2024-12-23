@@ -824,8 +824,6 @@ const deletecompany = async (req, res) => {
 const getsavedcompanies= async (req, res) => {
   try {
     const userId = req.user.id;
-
-    
     const savedCompanies = await SavedCompany.find({ userId })
       .sort({ savedAt: -1 }); // Most recent first
     
