@@ -218,4 +218,41 @@ const updatePassword = async (req, res)=>{
   
 }
 
-module.exports = { register, login, forgotPassword, resetPassword,updatePassword };
+
+
+const updateProfile = async (req, res) => {
+    try {
+      const userId = req.user.id; // Assuming user ID is attached to the request after token validation
+      const { name, profilePic } = req.body;
+  
+      if (!name && !profilePic) {
+        return res.status(400).json({ message: 'Name or profile picture must be provided.' });
+      }
+  
+      const updatedData = {};
+      if (name) updatedData.name = name;
+      if (profilePic) updatedData.profilePic = profilePic;
+  
+      const updatedUser = await User.findByIdAndUpdate(userId, updatedData, {
+        new: true, // Return the updated document
+        runValidators: true, // Run schema validation
+      });
+  
+      if (!updatedUser) {
+        return res.status(404).json({ message: 'User not found.' });
+      }
+  
+      res.status(200).json({
+        message: 'Profile updated successfully.',
+        user: {
+          name: updatedUser.name,
+          profilePic: updatedUser.profilePic,
+        },
+      });
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      res.status(500).json({ message: 'An error occurred while updating the profile.' });
+    }
+  };
+
+module.exports = { register, login, forgotPassword, resetPassword,updatePassword ,updateProfile};
