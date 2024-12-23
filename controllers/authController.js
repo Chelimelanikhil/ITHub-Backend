@@ -186,10 +186,10 @@ const resetPassword = async (req, res) => {
 
 const updatePassword = async (req, res)=>{
     const userId = req.user.id;
-    const { oldPassword, newPassword } = req.body;
-    console.log(req.body);
+    const { currentPassword, newPassword } = req.body;
+   
 
-    if (!userId || !oldPassword || !newPassword) {
+    if (!userId || !currentPassword || !newPassword) {
       return res.status(400).json({ message: 'All fields are required' });
     }
   
@@ -200,7 +200,7 @@ const updatePassword = async (req, res)=>{
       }
   
       // Verify old password
-      const isMatch = await bcrypt.compare(oldPassword, user.password);
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
       if (!isMatch) {
         return res.status(400).json({ message: 'Old password is incorrect' });
       }
