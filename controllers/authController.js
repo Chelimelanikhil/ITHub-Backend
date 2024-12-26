@@ -90,7 +90,7 @@ const login = async (req, res) => {
         const token = jwt.sign(
             { id: user._id, email: user.email },
             JWT_SECRET,
-            { expiresIn: '10h' }
+            { expiresIn: '10d' }
         );
 
         // Include role in the response
