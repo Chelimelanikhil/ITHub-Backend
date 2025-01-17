@@ -436,7 +436,6 @@ const addJob = async (req, res) => {
 
     company.jobs.push(newJob);  // Add the new job to the company's jobs array
     await company.save();  // Save the company document with the new job
-
     res.status(200).json({ message: 'Job added successfully', job: newJob });
   } catch (error) {
     console.error('Error adding job:', error);

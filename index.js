@@ -11,7 +11,7 @@ const userRoutes = require('./routes/userRoutes');
 
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 
 // Enable CORS for all routes
 app.use(cors());
