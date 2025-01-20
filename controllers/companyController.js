@@ -419,6 +419,7 @@ const updateabout = async (req, res) => {
 
 
 const onboarding = async (req, res) => {
+  //console.log(req.body);
   try {
     // Destructure the request body
     const { 
@@ -501,6 +502,7 @@ const onboarding = async (req, res) => {
     };
 
     if (payment) {
+      console.log(payment);
       // Validate card details
       if (!payment.cardDetails || 
           !payment.cardDetails.lastFourDigits || 
@@ -529,11 +531,6 @@ const onboarding = async (req, res) => {
           cardType: payment.cardDetails.cardType
         },
         billingAddress: payment.billingAddress || {},
-        subscription: {
-          startDate: new Date(),
-          endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-          autoRenew: true
-        },
         paymentHistory: [{
           transactionId: generateTransactionId(), // Implement this function
           amount: 15,
@@ -595,6 +592,7 @@ const onboarding = async (req, res) => {
     console.error('Error saving company profile:', error);
 
     if (error.name === 'ValidationError') {
+      console.log(error.name)
       const validationErrors = Object.values(error.errors).map(err => ({
         field: err.path,
         message: err.message

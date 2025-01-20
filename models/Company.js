@@ -290,22 +290,7 @@ const companySchema = new mongoose.Schema({
                 type: Date,
                 default: Date.now
             }
-        }],
-        subscription: {
-            startDate: {
-                type: Date
-            },
-            endDate: {
-                type: Date
-            },
-            autoRenew: {
-                type: Boolean,
-                default: false
-            },
-            cancelledAt: {
-                type: Date
-            }
-        }
+        }]
     }
 }, {
     timestamps: true 
