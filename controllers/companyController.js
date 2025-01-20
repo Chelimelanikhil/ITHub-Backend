@@ -245,6 +245,179 @@ const getAllCompanies = async (req, res) => {
 // };
 
 
+// const onboarding = async (req, res) => {
+//   try {
+//     // Destructure the request body
+//     const { 
+//       basicInfo, 
+//       about, 
+//       jobs, 
+//       reviews, 
+//       gallery
+//     } = req.body;
+
+//     // Validate basic required fields
+//     if (!basicInfo || !basicInfo.name || !basicInfo.email || !basicInfo.industry) {
+//       return res.status(400).json({ 
+//         message: 'Missing required fields',
+//         requiredFields: ['name', 'email', 'industry']
+//       });
+//     }
+
+//     // Extract fields from basicInfo with destructuring and added default values
+//     const { 
+//       name, 
+//       email, 
+//       industry, 
+//       founded: foundedYear, 
+//       location, 
+//       employees, 
+//       rating, 
+//       openings, 
+//       logo,
+//       phone,
+//       headquarters,
+//       website,
+//       description,
+//       socialLinks = {},
+//       certifications = []
+//     } = basicInfo;
+
+//     // Validate email format
+//     const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+//     if (!emailRegex.test(email)) {
+//       return res.status(400).json({ 
+//         message: 'Invalid email format',
+//         example: 'example@domain.com'
+//       });
+//     }
+
+//     // Check if a company with this email already exists
+//     const existingCompany = await Company.findOne({ email });
+//     if (existingCompany) {
+//       return res.status(409).json({ 
+//         message: 'A company with this email already exists'
+//       });
+//     }
+
+//     // Validate jobs if provided
+//     if (jobs && jobs.length > 0) {
+//       const validJobTypes = ['Part-Time', 'Full-Time', 'Internship', 'Contract'];
+//       const invalidJobs = jobs.filter(job => 
+//         !job.title || 
+//         !job.description || 
+//         !job.requirements || 
+//         !job.location || 
+//         job.salary === undefined ||
+//         !validJobTypes.includes(job.type)
+//       );
+
+//       if (invalidJobs.length > 0) {
+//         return res.status(400).json({ 
+//           message: 'Invalid job entries',
+//           invalidJobs
+//         });
+//       }
+//     }
+
+//     // Create a new company instance with all the data
+//     const newCompany = new Company({
+//       // Basic Info
+//       name,
+//       email,
+//       industry,
+//       foundedYear,
+//       location,
+//       employees,
+//       rating,
+//       openings,
+//       logo,
+//       phone,
+      
+//       // Additional Fields
+//       createdBy: req.user.id,
+//       about,
+//       description,
+//       headquarters,
+//       website,
+      
+//       // Optional Fields
+//       socialLinks,
+//       certifications,
+      
+//       // Nested Documents
+//       jobs: jobs || [],
+//       reviews: reviews || [],
+//       gallery: gallery || []
+//     });
+
+//     // Save the new company to the database
+//     const savedCompany = await newCompany.save();
+
+//     // Send a response confirming the data has been saved
+//     res.status(201).json({
+//       message: 'Company profile created successfully!',
+//       company: {
+//         id: savedCompany._id,
+//         name: savedCompany.name,
+//         email: savedCompany.email,
+//         industry: savedCompany.industry
+//       }
+//     });
+//   } catch (error) {
+//     console.error('Error saving company profile:', error);
+
+//     // Handle specific Mongoose validation errors
+//     if (error.name === 'ValidationError') {
+//       const validationErrors = Object.values(error.errors).map(err => ({
+//         field: err.path,
+//         message: err.message
+//       }));
+
+//       return res.status(400).json({ 
+//         message: 'Validation Error',
+//         errors: validationErrors 
+//       });
+//     }
+
+//     // Generic server error
+//     res.status(500).json({ 
+//       message: 'Internal Server Error', 
+//       error: error.message 
+//     });
+//   }
+// };
+
+const updateabout = async (req, res) => {
+  const { companyId, about } = req.body;
+
+  // Validate the request body
+  if (!companyId || !about) {
+    return res.status(400).json({ message: 'Company ID and About are required.' });
+  }
+
+  try {
+    // Update the company record in the database
+    const updatedCompany = await Company.findByIdAndUpdate(
+      companyId,
+      { about }, // Set the new "about" content
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedCompany) {
+      return res.status(404).json({ message: 'Company not found.' });
+    }
+
+    res.status(200).json({
+      message: 'Company about section updated successfully.'
+    });
+  } catch (error) {
+    console.error('Error updating company:', error);
+    res.status(500).json({ message: 'Internal server error. Please try again later.' });
+  }
+}
+
+
 const onboarding = async (req, res) => {
   try {
     // Destructure the request body
@@ -253,7 +426,8 @@ const onboarding = async (req, res) => {
       about, 
       jobs, 
       reviews, 
-      gallery
+      gallery,
+      payment // Add payment to destructuring
     } = req.body;
 
     // Validate basic required fields
@@ -320,6 +494,55 @@ const onboarding = async (req, res) => {
       }
     }
 
+    // Process payment information
+    let paymentData = {
+      status: 'pending',
+      amount: 15, // Default amount
+    };
+
+    if (payment) {
+      // Validate card details
+      if (!payment.cardDetails || 
+          !payment.cardDetails.lastFourDigits || 
+          !payment.cardDetails.expiryDate) {
+        return res.status(400).json({
+          message: 'Invalid payment details',
+          requiredFields: ['cardDetails.lastFourDigits', 'cardDetails.expiryDate']
+        });
+      }
+
+      // Validate expiry date format
+      const expiryDateRegex = /^(0[1-9]|1[0-2])\/([0-9]{2})$/;
+      if (!expiryDateRegex.test(payment.cardDetails.expiryDate)) {
+        return res.status(400).json({
+          message: 'Invalid expiry date format',
+          example: 'MM/YY'
+        });
+      }
+
+      paymentData = {
+        status: 'active',
+        amount: 15,
+        cardDetails: {
+          lastFourDigits: payment.cardDetails.lastFourDigits,
+          expiryDate: payment.cardDetails.expiryDate,
+          cardType: payment.cardDetails.cardType
+        },
+        billingAddress: payment.billingAddress || {},
+        subscription: {
+          startDate: new Date(),
+          endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+          autoRenew: true
+        },
+        paymentHistory: [{
+          transactionId: generateTransactionId(), // Implement this function
+          amount: 15,
+          status: 'success',
+          date: new Date()
+        }]
+      };
+    }
+
     // Create a new company instance with all the data
     const newCompany = new Company({
       // Basic Info
@@ -348,7 +571,10 @@ const onboarding = async (req, res) => {
       // Nested Documents
       jobs: jobs || [],
       reviews: reviews || [],
-      gallery: gallery || []
+      gallery: gallery || [],
+      
+      // Payment Information
+      payment: paymentData
     });
 
     // Save the new company to the database
@@ -361,13 +587,13 @@ const onboarding = async (req, res) => {
         id: savedCompany._id,
         name: savedCompany.name,
         email: savedCompany.email,
-        industry: savedCompany.industry
+        industry: savedCompany.industry,
+        paymentStatus: savedCompany.payment.status
       }
     });
   } catch (error) {
     console.error('Error saving company profile:', error);
 
-    // Handle specific Mongoose validation errors
     if (error.name === 'ValidationError') {
       const validationErrors = Object.values(error.errors).map(err => ({
         field: err.path,
@@ -380,7 +606,6 @@ const onboarding = async (req, res) => {
       });
     }
 
-    // Generic server error
     res.status(500).json({ 
       message: 'Internal Server Error', 
       error: error.message 
@@ -388,34 +613,81 @@ const onboarding = async (req, res) => {
   }
 };
 
-const updateabout = async (req, res) => {
-  const { companyId, about } = req.body;
+// Helper function to generate transaction ID
+const generateTransactionId = () => {
+  return 'TXN' + Date.now() + Math.random().toString(36).substr(2, 9);
+};
 
-  // Validate the request body
-  if (!companyId || !about) {
-    return res.status(400).json({ message: 'Company ID and About are required.' });
+// Update payment information
+const updatePayment = async (req, res) => {
+  const { companyId, paymentDetails } = req.body;
+
+  if (!companyId || !paymentDetails) {
+    return res.status(400).json({ 
+      message: 'Company ID and payment details are required.' 
+    });
   }
 
   try {
-    // Update the company record in the database
-    const updatedCompany = await Company.findByIdAndUpdate(
-      companyId,
-      { about }, // Set the new "about" content
-      { new: true } // Return the updated document
-    );
-
-    if (!updatedCompany) {
-      return res.status(404).json({ message: 'Company not found.' });
+    const company = await Company.findById(companyId);
+    
+    if (!company) {
+      return res.status(404).json({ 
+        message: 'Company not found.' 
+      });
     }
 
+    // Update card details if provided
+    if (paymentDetails.cardDetails) {
+      company.payment.cardDetails = {
+        ...company.payment.cardDetails,
+        ...paymentDetails.cardDetails
+      };
+    }
+
+    // Update billing address if provided
+    if (paymentDetails.billingAddress) {
+      company.payment.billingAddress = {
+        ...company.payment.billingAddress,
+        ...paymentDetails.billingAddress
+      };
+    }
+
+    // Add new transaction to payment history if payment is processed
+    if (paymentDetails.newTransaction) {
+      company.payment.paymentHistory.push({
+        transactionId: generateTransactionId(),
+        amount: 15,
+        status: 'success',
+        date: new Date()
+      });
+
+      // Update subscription dates
+      company.payment.subscription = {
+        startDate: new Date(),
+        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        autoRenew: true
+      };
+
+      company.payment.status = 'active';
+    }
+
+    // Save the updated company
+    await company.save();
+
     res.status(200).json({
-      message: 'Company about section updated successfully.'
+      message: 'Payment information updated successfully',
+      payment: company.payment
     });
   } catch (error) {
-    console.error('Error updating company:', error);
-    res.status(500).json({ message: 'Internal server error. Please try again later.' });
+    console.error('Error updating payment:', error);
+    res.status(500).json({ 
+      message: 'Internal server error',
+      error: error.message 
+    });
   }
-}
+};
+
 
 const addJob = async (req, res) => {
   try {
@@ -832,4 +1104,4 @@ const getsavedcompanies= async (req, res) => {
   }
 }
 
-module.exports = { getCompany, getAllCompanies, onboarding, getCompanydetails, updateabout, addJob, updateJob, deleteJob, addreview, updatereview, deletereview, addimages, deleteimages,deleteMultipleImages,updatecompanyprofilepic,savecompany,savedcompany,deletecompany,getsavedcompanies };
+module.exports = { getCompany, getAllCompanies, onboarding,updatePayment, getCompanydetails, updateabout, addJob, updateJob, deleteJob, addreview, updatereview, deletereview, addimages, deleteimages,deleteMultipleImages,updatecompanyprofilepic,savecompany,savedcompany,deletecompany,getsavedcompanies };

@@ -230,8 +230,84 @@ const companySchema = new mongoose.Schema({
             type: String,
             trim: true 
         }
-    }]
+    }],
+    payment: {
+        status: {
+            type: String,
+            enum: ['active', 'inactive', 'pending', 'failed'],
+            default: 'inactive'
+        },
+        amount: {
+            type: Number,
+            default: 15,
+            required: true
+        },
+        cardDetails: {
+            lastFourDigits: {
+                type: String,
+                minlength: 4,
+                maxlength: 4
+            },
+            expiryDate: {
+                type: String,
+                validate: {
+                    validator: function(v) {
+                        return /^(0[1-9]|1[0-2])\/([0-9]{2})$/.test(v);
+                    },
+                    message: props => `${props.value} is not a valid expiry date format (MM/YY)!`
+                }
+            },
+            cardType: {
+                type: String,
+                enum: ['visa', 'mastercard', 'amex', 'discover']
+            }
+        },
+        billingAddress: {
+            country: {
+                type: String,
+                trim: true
+            },
+            postalCode: {
+                type: String,
+                trim: true
+            }
+        },
+        paymentHistory: [{
+            transactionId: {
+                type: String,
+                required: true
+            },
+            amount: {
+                type: Number,
+                required: true
+            },
+            status: {
+                type: String,
+                enum: ['success', 'failed', 'pending', 'refunded'],
+                required: true
+            },
+            date: {
+                type: Date,
+                default: Date.now
+            }
+        }],
+        subscription: {
+            startDate: {
+                type: Date
+            },
+            endDate: {
+                type: Date
+            },
+            autoRenew: {
+                type: Boolean,
+                default: false
+            },
+            cancelledAt: {
+                type: Date
+            }
+        }
+    }
 }, {
-    timestamps: true // This adds createdAt and updatedAt fields automatically
+    timestamps: true 
 });
 module.exports = mongoose.model('Company', companySchema);

@@ -1,6 +1,6 @@
 const express = require('express');
 
-const { getCompany, getAllCompanies, onboarding, getCompanydetails, updateabout, addJob, updateJob, deleteJob, addreview, updatereview, deletereview, addimages, deleteimages,deleteMultipleImages,updatecompanyprofilepic ,savecompany,savedcompany,deletecompany,getsavedcompanies} = require('../controllers/companyController');
+const { getCompany, getAllCompanies, onboarding, getCompanydetails,updatePayment, updateabout, addJob, updateJob, deleteJob, addreview, updatereview, deletereview, addimages, deleteimages,deleteMultipleImages,updatecompanyprofilepic ,savecompany,savedcompany,deletecompany,getsavedcompanies} = require('../controllers/companyController');
 const { authenticate } = require('../middleware/authMiddleware');
 
 // Initialize Router
@@ -8,6 +8,9 @@ const router = express.Router();
 
 
 router.post('/onboarding', authenticate, onboarding)
+
+
+router.put('/payment', authenticate, updatePayment);
 
 router.get('/companydetails', authenticate, getCompanydetails);
 
