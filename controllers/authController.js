@@ -63,7 +63,7 @@ const register = async (req, res) => {
             message: 'User registered successfully',
             token,
             role: user.role,
-            profilePic: user.profilePic, 
+            profilePic: user.profilePic,
         });
     } catch (err) {
         res.status(500).json({ message: 'Error registering user', error: err.message });
@@ -184,75 +184,75 @@ const resetPassword = async (req, res) => {
     }
 }
 
-const updatePassword = async (req, res)=>{
+const updatePassword = async (req, res) => {
     const userId = req.user.id;
     const { currentPassword, newPassword } = req.body;
-   
+
 
     if (!userId || !currentPassword || !newPassword) {
-      return res.status(400).json({ message: 'All fields are required' });
+        return res.status(400).json({ message: 'All fields are required' });
     }
-  
+
     try {
-      const user = await User.findById(userId);
-      if (!user) {
-        return res.status(404).json({ message: 'User not found' });
-      }
-  
-      // Verify old password
-      const isMatch = await bcrypt.compare(currentPassword, user.password);
-      if (!isMatch) {
-        return res.status(400).json({ message: 'Old password is incorrect' });
-      }
-  
-      // Hash new password
-      //const hashedPassword = await bcrypt.hash(newPassword, 10);
-      user.password = newPassword;
-  
-      await user.save();
-      res.status(200).json({ message: 'Password reset successfully' });
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Verify old password
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Old password is incorrect' });
+        }
+
+        // Hash new password
+        //const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = newPassword;
+
+        await user.save();
+        res.status(200).json({ message: 'Password reset successfully' });
     } catch (error) {
-      console.error('Error resetting password:', error);
-      res.status(500).json({ message: 'Internal server error' });
+        console.error('Error resetting password:', error);
+        res.status(500).json({ message: 'Internal server error' });
     }
-  
+
 }
 
 
 
 const updateProfile = async (req, res) => {
     try {
-      const userId = req.user.id; // Assuming user ID is attached to the request after token validation
-      const { name, profilePic } = req.body;
-  
-      if (!name && !profilePic) {
-        return res.status(400).json({ message: 'Name or profile picture must be provided.' });
-      }
-  
-      const updatedData = {};
-      if (name) updatedData.name = name;
-      if (profilePic) updatedData.profilePic = profilePic;
-  
-      const updatedUser = await User.findByIdAndUpdate(userId, updatedData, {
-        new: true, // Return the updated document
-        runValidators: true, // Run schema validation
-      });
-  
-      if (!updatedUser) {
-        return res.status(404).json({ message: 'User not found.' });
-      }
-  
-      res.status(200).json({
-        message: 'Profile updated successfully.',
-        user: {
-          name: updatedUser.name,
-          profilePic: updatedUser.profilePic,
-        },
-      });
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      res.status(500).json({ message: 'An error occurred while updating the profile.' });
-    }
-  };
+        const userId = req.user.id; // Assuming user ID is attached to the request after token validation
+        const { name, profilePic } = req.body;
 
-module.exports = { register, login, forgotPassword, resetPassword,updatePassword ,updateProfile};
+        if (!name && !profilePic) {
+            return res.status(400).json({ message: 'Name or profile picture must be provided.' });
+        }
+
+        const updatedData = {};
+        if (name) updatedData.name = name;
+        if (profilePic) updatedData.profilePic = profilePic;
+
+        const updatedUser = await User.findByIdAndUpdate(userId, updatedData, {
+            new: true, // Return the updated document
+            runValidators: true, // Run schema validation
+        });
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        res.status(200).json({
+            message: 'Profile updated successfully.',
+            user: {
+                name: updatedUser.name,
+                profilePic: updatedUser.profilePic,
+            },
+        });
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        res.status(500).json({ message: 'An error occurred while updating the profile.' });
+    }
+};
+
+module.exports = { register, login, forgotPassword, resetPassword, updatePassword, updateProfile };

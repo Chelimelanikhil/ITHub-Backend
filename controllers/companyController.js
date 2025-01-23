@@ -1039,13 +1039,15 @@ const savecompany= async (req, res) => {
   try {
     const userId = req.user.id;
     console.log(userId);
-    const { companyId, companyName, companyLogo } = req.body;
+    const { companyId, companyName, companyLogo,companyLocation,companyEmployees } = req.body;
     
     const savedCompany = new SavedCompany({
       userId,
       companyId,
       companyName,
       companyLogo,
+      companyLocation,
+      companyLocation,
       savedAt: new Date()
     });
     

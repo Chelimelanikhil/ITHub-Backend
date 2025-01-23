@@ -16,6 +16,13 @@ const savedCompanySchema = new mongoose.Schema({
   companyLogo: {
     type: String,
     required: true
+  }, companyLocation: {
+    type: String,
+    required: true
+  },
+  companyLocation: {
+    type: String,
+    required: true
   },
   savedAt: {
     type: Date,
