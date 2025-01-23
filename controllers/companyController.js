@@ -1047,7 +1047,7 @@ const savecompany= async (req, res) => {
       companyName,
       companyLogo,
       companyLocation,
-      companyLocation,
+      companyEmployees,
       savedAt: new Date()
     });
     
