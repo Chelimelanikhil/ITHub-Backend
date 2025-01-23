@@ -16,11 +16,12 @@ const savedCompanySchema = new mongoose.Schema({
   companyLogo: {
     type: String,
     required: true
-  }, companyLocation: {
+  },
+   companyLocation: {
     type: String,
     required: true
   },
-  companyLocation: {
+  companyEmployees: {
     type: String,
     required: true
   },
